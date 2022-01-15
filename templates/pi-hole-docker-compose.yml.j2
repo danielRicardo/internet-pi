@@ -2,6 +2,13 @@
 ---
 version: "3"
 
+networks:
+  dns_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.42.0.0/16
+
 # More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
 services:
   pihole:
@@ -20,10 +27,25 @@ services:
       ServerIP: '{{ ansible_facts['default_ipv4']['address'] }}'
     dns:
       - 127.0.0.1
-      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      dns_net:
+        ipv4_address: 172.42.0.6
     volumes:
       - './etc-pihole/:/etc/pihole/'
       - './etc-dnsmasq.d/:/etc/dnsmasq.d/'
-    cap_add:
-      - NET_ADMIN
+    restart: unless-stopped
+  unbound:
+    container_name: unbound
+    image: mvance/unbound-rpi:latest
+    networks:
+      dns_net:
+        ipv4_address: 172.42.0.7
+    # volumes:
+    #   - ./unbound:/opt/unbound/etc/unbound
+    ports:
+      - "5335:5335/tcp"
+      - "5335:5335/udp"
+    healthcheck:
+      disable: true
     restart: unless-stopped
