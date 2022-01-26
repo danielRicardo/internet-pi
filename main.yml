@@ -29,6 +29,10 @@
       ansible.builtin.import_tasks: tasks/handlers.yml
 
   tasks:
+    - name: Set up Wireguard server
+      ansible.builtin.import_tasks: tasks/wireguard.yml
+      when: wireguard_enabled
+
     - name: Setup Docker.
       ansible.builtin.import_tasks: tasks/docker.yml
 

@@ -1,0 +1,27 @@
+# {{ ansible_managed }}
+---
+version: '3'
+services:
+  wireguard_server:
+    image: ghcr.io/linuxserver/wireguard
+    container_name: wireguard_server
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID= {{ ansible_facts.getent_passwd.pi[1] }}
+      - PGID=  {{ ansible_facts.getent_passwd.pi[2]}}
+      - TZ= {{ pi_timezone }}
+      - SERVERURL= {{ wireguard_server_url }}
+      - PEERS= {{ wireguard_peers | join(",") }}
+      - INTERNAL_SUBNET=10.13.13.0 #optional
+      - ALLOWEDIPS=0.0.0.0/0 #optional
+    volumes:
+      - /home/pi/wireguard/config:/config
+      - /lib/modules:/lib/modules
+    ports:
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped
+
