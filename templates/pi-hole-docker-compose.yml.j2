@@ -7,7 +7,7 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.42.0.0/16
+        - subnet: {{ dns_net_subnet }}
 
 # More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
 services:
@@ -30,7 +30,7 @@ services:
       - 1.1.1.1
     networks:
       dns_net:
-        ipv4_address: 172.42.0.6
+        ipv4_address: {{ dns_net_pihole_ip }}
     volumes:
       - './etc-pihole/:/etc/pihole/'
       - './etc-dnsmasq.d/:/etc/dnsmasq.d/'
@@ -40,7 +40,7 @@ services:
     image: mvance/unbound-rpi:latest
     networks:
       dns_net:
-        ipv4_address: 172.42.0.7
+        ipv4_address: {{ dns_net_unbound_ip }}
     # volumes:
     #   - ./unbound:/opt/unbound/etc/unbound
     ports:

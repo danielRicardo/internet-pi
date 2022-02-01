@@ -21,13 +21,15 @@ services:
       - SERVERURL={{ wireguard_server_url }}
       - PEERS={{ wireguard_peers | join(",") }}
       - PEERDNS=auto
-
     volumes:
       - /home/pi/wireguard/config:/config
       - /lib/modules:/lib/modules
     ports:
       - 51820:51820/udp
-    dns: 172.42.0.6
+    networks:
+      - default
+      - dns_net
+    dns: {{ dns_net_pihole_ip }}
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
     restart: unless-stopped
