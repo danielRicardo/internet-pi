@@ -1,0 +1,50 @@
+---
+- name: Check if Wireguard is alredy present.
+  ansible.builtin.command: which wg
+  failed_when: false
+  changed_when: false
+  check_mode: false
+  register: wireguard_installed
+
+- name: Install wireguard (Debian)
+  ansible.builtin.apt:
+    name:
+      - wireguard
+  when:
+    - wireguard_installed.rc == 1
+    - ansible_facts.os_family == "Debian"
+
+- name: Install wireguard (ArchLinux)
+  ansible.builtin.pacman:
+    name:
+      - wireguard
+  when:
+    - wireguard_installed.rc == 1 
+    - ansible_facts.os_family == "Archlinux"
+
+- name: Create Wireguard folder on Pi.
+  ansible.builtin.file:
+    path: ~/wireguard
+    state: directory
+    mode: 0755
+  become: false
+
+- name: Get PUID and GUID for the pi user
+  getent:
+    database: passwd
+    key: pi
+  become: true
+
+- name: Copy Wireguard docker-compose template to Pi.
+  ansible.builtin.template:
+    src: templates/wireguard-docker-compose.yml.j2
+    dest: ~/wireguard/docker-compose.yml
+    mode: '0640'
+  become: false
+  notify: Restart wireguard
+
+- name: Ensure Wireguard is running.
+  community.docker.docker_compose:
+    project_src: ~/wireguard/
+    build: false
+  become: false

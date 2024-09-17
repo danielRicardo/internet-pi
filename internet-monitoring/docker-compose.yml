@@ -31,8 +31,8 @@ services:
       - back-tier
 
   grafana:
-    image: grafana/grafana
-    restart: always
+    image: grafana/grafana-oss:8.3.3-ubuntu
+    restart: unless-stopped
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
